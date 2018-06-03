@@ -41,6 +41,8 @@ export default class Online extends React.Component<Props, State> {
 
   render() {
     const { render } = this.props;
-    return typeof render === "function" ? render(this.state) : null;
+    const renderedComponent =
+      typeof render === "function" ? render(this.state) : null;
+    return renderedComponent;
   }
 }
