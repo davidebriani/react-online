@@ -1,4 +1,5 @@
 import React from "react";
+import isOnline from "isomorphic-is-online";
 
 type Props = {
   render: Function,
@@ -16,27 +17,45 @@ export default class Online extends React.Component<Props, State> {
   };
 
   state = {
-    online: window.navigator.onLine
+    online: window && window.navigator ? window.navigator.onLine : false
   };
 
   componentDidMount() {
-    const { onChange } = this.props;
-    window.addEventListener("offline", this.handleChange);
-    window.addEventListener("online", this.handleChange);
-    if (typeof onChange === "function") {
-      onChange(this.state);
+    if (window && window.addEventListener) {
+      window.addEventListener("offline", this.markAsOffline);
+      window.addEventListener("online", this.checkIfOnline);
+    } else {
+      this.checkInterval = setInterval(this.checkIfOnline, 30000);
     }
   }
 
   componentWillUnmount() {
-    window.removeEventListener("offline", this.handleChange);
-    window.removeEventListener("online", this.handleChange);
+    if (window && window.addEventListener) {
+      window.removeEventListener("offline", this.markAsOffline);
+      window.removeEventListener("online", this.checkIfOnline);
+    }
+    clearInterval(this.checkInterval);
   }
 
-  handleChange = () => {
-    const online = window.navigator.onLine;
-    this.props.onChange({ online });
+  checkIfOnline = () => {
+    if (window && window.navigator) {
+      if (!window.navigator.onLine) {
+        return this.handleChange(false);
+      }
+    }
+    isOnline.then(online => this.handleChange(online));
+  };
+
+  handleChange = online => {
+    const { onChange } = this.props;
     this.setState({ online });
+    if (typeof onChange === "function") {
+      onChange({ online });
+    }
+  };
+
+  markAsOffline = () => {
+    this.handleChange(false);
   };
 
   render() {

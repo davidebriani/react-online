@@ -7,7 +7,7 @@
     "prebuild": "rimraf dist",
     "build": "babel src --out-dir dist --ignore *.test.js",
     "commit": "git-cz",
-    "precommit": "lint-staged",
+    "precommit": "flow check && lint-staged",
     "prettify": "prettier --write 'src/**/*.js'",
     "flow": "flow",
     "lint": "eslint src",
@@ -37,6 +37,7 @@
   },
   "homepage": "https://github.com/TheWorm/react-online#readme",
   "dependencies": {
+    "isomorphic-is-online": "1.1.0",
     "react": "16.4.0"
   },
   "devDependencies": {
@@ -66,7 +67,6 @@
     "src/**/*.js": [
       "npm run lint --",
       "prettier --write",
-      "npm run flow",
       "git add"
     ]
   },
