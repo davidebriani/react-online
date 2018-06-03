@@ -22,9 +22,15 @@
     "type": "git",
     "url": "https://github.com/TheWorm/react-online.git"
   },
-  "keywords": ["react", "online", "offline", "connection", "status", "network"],
-  "author":
-    "Davide Briani <johnnytheworm@gmail.com> (https://github.com/theworm)",
+  "keywords": [
+    "react",
+    "online",
+    "offline",
+    "connection",
+    "status",
+    "network"
+  ],
+  "author": "Davide Briani <johnnytheworm@gmail.com> (https://github.com/theworm)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/TheWorm/react-online/issues"
@@ -64,5 +70,8 @@
       "git add"
     ]
   },
-  "files": ["dist", "README.md"]
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }
