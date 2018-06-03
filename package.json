@@ -64,8 +64,5 @@
       "git add"
     ]
   },
-  "czConfig": {
-    "path": "node_modules/cz-conventional-changelog"
-  },
   "files": ["dist", "README.md"]
 }
