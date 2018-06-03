@@ -43,7 +43,7 @@ export default class Online extends React.Component<Props, State> {
         return this.handleChange(false);
       }
     }
-    isOnline.then(online => this.handleChange(online));
+    isOnline().then(online => this.handleChange(online));
   };
 
   handleChange = online => {
