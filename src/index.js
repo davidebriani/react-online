@@ -37,7 +37,9 @@ export default class Online extends React.Component<Props, State> {
         this.handleReactNativeConnectionChange
       );
     } else {
-      this.checkInterval = setInterval(this.checkIfOnline, 5000);
+      if (setInterval && typeof setInterval === "function") {
+        this.checkInterval = setInterval(this.checkIfOnline, 5000);
+      }
     }
     this.checkIfOnline();
   }
@@ -47,7 +49,7 @@ export default class Online extends React.Component<Props, State> {
       window.removeEventListener("offline", this.markAsOffline);
       window.removeEventListener("online", this.checkIfOnline);
     } else if (utils.environment === "REACT-NATIVE") {
-      NetInfo.remoteEventListener(
+      NetInfo.removeEventListener(
         "connectionChange",
         this.handleReactNativeConnectionChange
       );
