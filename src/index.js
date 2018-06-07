@@ -38,6 +38,7 @@ export default class Online extends React.Component<Props, State> {
     } else {
       this.checkInterval = setInterval(this.checkIfOnline, 5000);
     }
+    this.checkIfOnline();
   }
 
   componentWillUnmount() {
@@ -81,6 +82,9 @@ export default class Online extends React.Component<Props, State> {
 
   handleConnectionChange = (online: boolean) => {
     const { onChange } = this.props;
+    if (online === this.state.online) {
+      return;
+    }
     this.setState({ online });
     if (typeof onChange === "function") {
       onChange({ online });
