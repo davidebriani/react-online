@@ -38,7 +38,8 @@
   "homepage": "https://github.com/TheWorm/react-online#readme",
   "dependencies": {
     "isomorphic-is-online": "1.1.0",
-    "react": "16.4.0"
+    "react": "16.4.0",
+    "react-native": "0.55.4"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
