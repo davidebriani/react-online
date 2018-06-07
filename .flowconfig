@@ -9,3 +9,6 @@
 [options]
 
 [strict]
+
+[untyped]
+.*/node_modules/react-native

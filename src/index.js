@@ -1,3 +1,4 @@
+/* @flow */
 import React from "react";
 import { NetInfo } from "react-native";
 import isOnline from "isomorphic-is-online";
