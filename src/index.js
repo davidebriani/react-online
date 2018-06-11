@@ -22,15 +22,21 @@ export default class Online extends React.Component<Props, State> {
   };
 
   checkInterval = null;
+  hasEventListeners = false;
+  isCheckingConnection = false;
 
   state = {
+    // online: false
     online: window && window.navigator ? window.navigator.onLine : false
   };
 
   componentDidMount() {
     if (utils.environment === "WEB" && window && window.addEventListener) {
-      window.addEventListener("offline", this.markAsOffline);
-      window.addEventListener("online", this.checkIfOnline);
+      if (!this.hasEventListeners) {
+        window.addEventListener("offline", this.markAsOffline);
+        window.addEventListener("online", this.checkIfOnline);
+        this.hasEventListeners = true;
+      }
     } else if (utils.environment === "REACT-NATIVE") {
       NetInfo.addEventListener(
         "connectionChange",
@@ -41,7 +47,7 @@ export default class Online extends React.Component<Props, State> {
         this.checkInterval = setInterval(this.checkIfOnline, 5000);
       }
     }
-    this.checkIfOnline();
+    return this.checkIfOnline();
   }
 
   componentWillUnmount() {
@@ -60,12 +66,21 @@ export default class Online extends React.Component<Props, State> {
   }
 
   checkIfOnline = () => {
+    if (this.isCheckingConnection) {
+      return;
+    }
+    this.isCheckingConnection = true;
     if (window && window.navigator) {
       if (!window.navigator.onLine) {
-        return this.handleConnectionChange(false);
+        this.handleConnectionChange(false);
+        this.isCheckingConnection = false;
+        return;
       }
     }
-    isOnline().then((online: boolean) => this.handleConnectionChange(online));
+    return isOnline().then((online: boolean) => {
+      this.handleConnectionChange(online);
+      this.isCheckingConnection = false;
+    });
   };
 
   handleReactNativeConnectionChange = (connectionInfo: any) => {
@@ -90,7 +105,7 @@ export default class Online extends React.Component<Props, State> {
     }
     this.setState({ online });
     if (typeof onChange === "function") {
-      onChange({ online });
+      return onChange({ online });
     }
   };
 
