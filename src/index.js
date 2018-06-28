@@ -11,8 +11,8 @@ type State = {
 };
 
 type Props = {
-  render: (state: State) => Element<any>,
-  onChange: (state: State) => any
+  render?: (state: State) => Element<any>,
+  onChange?: (state: State) => any
 };
 
 export default class Online extends React.Component<Props, State> {
@@ -24,11 +24,21 @@ export default class Online extends React.Component<Props, State> {
   checkInterval = null;
   hasEventListeners = false;
   isCheckingConnection = false;
+  needsInitialCheck = true;
 
-  state = {
-    // online: false
-    online: window && window.navigator ? window.navigator.onLine : false
-  };
+  // state = {
+  //   online: !!window && !!window.navigator ? !!window.navigator.onLine : false
+  // };
+
+  constructor(props: Props) {
+    super(props);
+    let online = false;
+    if (utils.environment === "WEB") {
+      online =
+        !!window && !!window.navigator ? !!window.navigator.onLine : false;
+    }
+    this.state = { online };
+  }
 
   componentDidMount() {
     if (utils.environment === "WEB" && window && window.addEventListener) {
@@ -37,17 +47,21 @@ export default class Online extends React.Component<Props, State> {
         window.addEventListener("online", this.checkIfOnline);
         this.hasEventListeners = true;
       }
+      return this.checkIfOnline();
     } else if (utils.environment === "REACT-NATIVE") {
-      NetInfo.addEventListener(
-        "connectionChange",
-        this.handleReactNativeConnectionChange
-      );
+      if (!this.hasEventListeners) {
+        NetInfo.addEventListener(
+          "connectionChange",
+          this.handleReactNativeConnectionChange
+        );
+        this.hasEventListeners = true;
+      }
     } else {
       if (setInterval && typeof setInterval === "function") {
         this.checkInterval = setInterval(this.checkIfOnline, 5000);
       }
+      return this.checkIfOnline();
     }
-    return this.checkIfOnline();
   }
 
   componentWillUnmount() {
@@ -63,6 +77,7 @@ export default class Online extends React.Component<Props, State> {
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
     }
+    this.hasEventListeners = false;
   }
 
   checkIfOnline = () => {
@@ -101,12 +116,16 @@ export default class Online extends React.Component<Props, State> {
   handleConnectionChange = (online: boolean) => {
     const { onChange } = this.props;
     if (online === this.state.online) {
+      this.needsInitialCheck = false;
       return;
     }
     this.setState({ online });
     if (typeof onChange === "function") {
-      return onChange({ online });
+      if (!this.needsInitialCheck) {
+        return onChange({ online });
+      }
     }
+    this.needsInitialCheck = false;
   };
 
   markAsOffline = () => {
