@@ -1,8 +1,11 @@
 # react-online
 
-[![Build passing](https://img.shields.io/travis/TheWorm/react-online.svg)](https://travis-ci.org/TheWorm/react-online)
+[![Build passing](https://img.shields.io/travis/TheWorm/react-online.svg?label=Travis+CI)](https://travis-ci.org/TheWorm/react-online)
 [![Code coverage](https://img.shields.io/codecov/c/github/theworm/react-online.svg)](https://codecov.io/github/theworm/react-online)
-[![Release version](https://img.shields.io/github/release/theworm/react-online.svg)](https://www.npmjs.com/package/react-online)
+[![NPM package](https://img.shields.io/npm/v/react-online.svg)](https://www.npmjs.com/package/isomorphic-is-online)
+[![Code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![Last commit](https://img.shields.io/github/last-commit/theworm/react-online.svg)](https://github.com/TheWorm/react-online)
+[![License](https://img.shields.io/github/license/theworm/react-online.svg)](https://github.com/TheWorm/react-online/blob/master/LICENSE)
 
 A react component to declaratively check connection status. Uses [isomorphic-is-online](https://github.com/TheWorm/isomorphic-is-online) to work on Web, React Native and Node.
 

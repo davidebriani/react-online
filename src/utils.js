@@ -1,8 +1,4 @@
 /* @flow */
-type CancelablePromise = {|
-  promise: Promise<any>,
-  cancel: () => void
-|};
 
 export default {
   get environment() {
