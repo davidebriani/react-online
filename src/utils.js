@@ -1,4 +1,9 @@
 /* @flow */
+type CancelablePromise = {|
+  promise: Promise<any>,
+  cancel: () => void
+|};
+
 export default {
   get environment() {
     if (typeof document !== "undefined") {

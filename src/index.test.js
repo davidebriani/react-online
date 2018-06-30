@@ -13,17 +13,23 @@ jest.mock("isomorphic-is-online");
 jest.mock("react-native");
 jest.mock("./utils");
 
-describe("ALL", () => {
+describe("WEB", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    utils.__setEnvironment("WEB");
   });
 
-  test("renders with sane default props", async done => {
+  test("renders with sane defaults", async done => {
     let wrapper = null;
     try {
+      Object.defineProperty(window.navigator, "onLine", {
+        value: false,
+        configurable: true
+      });
       isOnline.mockResolvedValue(false);
       wrapper = shallow(<Online />);
       await wrapper.instance().componentDidMount();
+      expect(isOnline).toHaveBeenCalledTimes(0);
       expect(wrapper.state("online")).toBe(false);
       done();
     } catch (e) {
@@ -33,13 +39,6 @@ describe("ALL", () => {
         wrapper.unmount();
       }
     }
-  });
-});
-
-describe("WEB", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    utils.__setEnvironment("WEB");
   });
 
   test("navigator: online, isomorphic-is-online: offline", async done => {
@@ -234,25 +233,22 @@ describe("WEB", () => {
     }
   });
 
-  test.skip("navigator: online -> offline, isomorphic-is-online: offline", async done => {
+  test("navigator: online -> offline, isomorphic-is-online: offline", async done => {
     let wrapper = null;
     try {
       Object.defineProperty(window.navigator, "onLine", {
         value: true,
         configurable: true
       });
-      isOnline.mockResolvedValue(true);
+      isOnline.mockResolvedValue(false);
       const onChange = jest.fn();
       const renderComponent = () => <div />;
-      wrapper = shallow(
-        <Online onChange={onChange} render={renderComponent} />
-      );
+      wrapper = mount(<Online onChange={onChange} render={renderComponent} />);
       await wrapper.instance().componentDidMount();
       expect(isOnline).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledTimes(0);
-      expect(wrapper.state("online")).toBe(true);
+      expect(wrapper.state("online")).toBe(false);
 
-      const markAsOfflineSpy = jest.spyOn(wrapper.instance(), "markAsOffline");
       const handleConnectionChangeSpy = jest.spyOn(
         wrapper.instance(),
         "handleConnectionChange"
@@ -269,10 +265,8 @@ describe("WEB", () => {
       await new Promise(resolve => setTimeout(() => resolve(), 0));
 
       expect(handleConnectionChangeSpy).toHaveBeenCalledTimes(1);
-      expect(markAsOfflineSpy).toHaveBeenCalledTimes(1);
       expect(isOnline).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange.mock.calls[0][0]).toEqual({ online: false });
+      expect(onChange).toHaveBeenCalledTimes(0);
       expect(wrapper.state("online")).toBe(false);
       done();
     } catch (e) {
@@ -289,6 +283,24 @@ describe("REACT-NATIVE", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     utils.__setEnvironment("REACT-NATIVE");
+  });
+
+  test("renders with sane defaults", async done => {
+    let wrapper = null;
+    try {
+      NetInfo.__setConnectionInfo({ type: "cellular" });
+      wrapper = shallow(<Online />);
+      await wrapper.instance().componentDidMount();
+      expect(isOnline).toHaveBeenCalledTimes(0);
+      expect(wrapper.state("online")).toBe(false);
+      done();
+    } catch (e) {
+      done.fail(e);
+    } finally {
+      if (wrapper && wrapper.unmount) {
+        wrapper.unmount();
+      }
+    }
   });
 
   test("mounts with correct infos with cellular connectivity", async done => {
@@ -388,6 +400,32 @@ describe("REACT-NATIVE", () => {
       expect(wrapper.state("online")).toBe(false);
       wrapper.instance().handleReactNativeConnectionChange({ type: "rubbish" });
       expect(wrapper.state("online")).toBe(false);
+      done();
+    } catch (e) {
+      done.fail(e);
+    } finally {
+      if (wrapper && wrapper.unmount) {
+        wrapper.unmount();
+      }
+    }
+  });
+});
+
+describe("NODE", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    utils.__setEnvironment("NODE");
+  });
+
+  test("renders with sane defaults", async done => {
+    let wrapper = null;
+    try {
+      isOnline.mockResolvedValue(true);
+      wrapper = shallow(<Online />);
+      await wrapper.instance().componentDidMount();
+      expect(isOnline).toHaveBeenCalledTimes(1);
+      expect(wrapper.state("online")).toBe(true);
+      expect(wrapper.instance().checkInterval).toBeTruthy();
       done();
     } catch (e) {
       done.fail(e);

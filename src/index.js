@@ -25,10 +25,7 @@ export default class Online extends React.Component<Props, State> {
   hasEventListeners = false;
   isCheckingConnection = false;
   needsInitialCheck = true;
-
-  // state = {
-  //   online: !!window && !!window.navigator ? !!window.navigator.onLine : false
-  // };
+  isUnmounted = true;
 
   constructor(props: Props) {
     super(props);
@@ -41,13 +38,14 @@ export default class Online extends React.Component<Props, State> {
   }
 
   componentDidMount() {
+    this.isUnmounted = false;
     if (utils.environment === "WEB" && window && window.addEventListener) {
       if (!this.hasEventListeners) {
         window.addEventListener("offline", this.markAsOffline);
-        window.addEventListener("online", this.checkIfOnline);
+        window.addEventListener("online", this.initOnlineCheck);
         this.hasEventListeners = true;
       }
-      return this.checkIfOnline();
+      return this.initOnlineCheck();
     } else if (utils.environment === "REACT-NATIVE") {
       if (!this.hasEventListeners) {
         NetInfo.addEventListener(
@@ -58,16 +56,16 @@ export default class Online extends React.Component<Props, State> {
       }
     } else {
       if (setInterval && typeof setInterval === "function") {
-        this.checkInterval = setInterval(this.checkIfOnline, 5000);
+        this.checkInterval = setInterval(this.initOnlineCheck, 5000);
       }
-      return this.checkIfOnline();
+      return this.initOnlineCheck();
     }
   }
 
   componentWillUnmount() {
     if (utils.environment === "WEB" && window && window.addEventListener) {
       window.removeEventListener("offline", this.markAsOffline);
-      window.removeEventListener("online", this.checkIfOnline);
+      window.removeEventListener("online", this.initOnlineCheck);
     } else if (utils.environment === "REACT-NATIVE") {
       NetInfo.removeEventListener(
         "connectionChange",
@@ -76,16 +74,18 @@ export default class Online extends React.Component<Props, State> {
     }
     if (this.checkInterval) {
       clearInterval(this.checkInterval);
+      this.checkInterval = null;
     }
     this.hasEventListeners = false;
+    this.isUnmounted = true;
   }
 
-  checkIfOnline = () => {
+  initOnlineCheck = async (): Promise<void> => {
     if (this.isCheckingConnection) {
       return;
     }
     this.isCheckingConnection = true;
-    if (window && window.navigator) {
+    if (utils.environment === "WEB" && window && window.navigator) {
       if (!window.navigator.onLine) {
         this.handleConnectionChange(false);
         this.isCheckingConnection = false;
@@ -98,7 +98,7 @@ export default class Online extends React.Component<Props, State> {
     });
   };
 
-  handleReactNativeConnectionChange = (connectionInfo: any) => {
+  handleReactNativeConnectionChange = (connectionInfo: any): void => {
     switch (connectionInfo.type) {
       case "none":
         return this.handleConnectionChange(false);
@@ -113,22 +113,26 @@ export default class Online extends React.Component<Props, State> {
     }
   };
 
-  handleConnectionChange = (online: boolean) => {
+  handleConnectionChange = (online: boolean): void => {
     const { onChange } = this.props;
     if (online === this.state.online) {
       this.needsInitialCheck = false;
       return;
     }
-    this.setState({ online });
+    const nextState: State = { online };
+    if (!this.isUnmounted) {
+      this.setState(nextState);
+    }
     if (typeof onChange === "function") {
       if (!this.needsInitialCheck) {
-        return onChange({ online });
+        onChange(nextState);
+        return;
       }
     }
     this.needsInitialCheck = false;
   };
 
-  markAsOffline = () => {
+  markAsOffline = (): void => {
     this.handleConnectionChange(false);
   };
 
